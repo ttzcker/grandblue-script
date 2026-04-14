@@ -1,0 +1,1 @@
+自用https://www.tampermonkey.net/script_installation.php#url=https://github.com/ttzcker/grandblue-script/raw/refs/heads/main/%E6%89%BE%E5%89%AF%E6%9C%AC/GBF%20%E5%89%AF%E6%9C%AC%E7%9B%91%E6%8E%A7.user.js
