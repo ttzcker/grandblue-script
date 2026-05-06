@@ -16,12 +16,14 @@ with sync_playwright() as p:
     print("开始自动流程...")
 
     while True:
-
+        page.reload()
+        page.goto("https://game.granbluefantasy.jp/#quest/assist")
+        page.wait_for_timeout(2000)
         # ===== 找副本并点击 =====
         found = page.evaluate("""
         () => {
-            const min = 10;
-            const max = 35;
+            const min = 5;
+            const max = 15;
 
             let best = null;
             let bestDiff = Infinity;
@@ -62,7 +64,6 @@ with sync_playwright() as p:
 
         if not found:
             print("没找到副本 → 刷新")
-            page.reload()
             page.wait_for_timeout(2000)
             continue
 
@@ -92,6 +93,8 @@ with sync_playwright() as p:
         """)
 
         print("尝试点击 OK")
+
+        print("尝试点击 OK")
         page.wait_for_timeout(3000)
 
         # ===== 点 AUTO =====
@@ -100,33 +103,12 @@ with sync_playwright() as p:
             page.click(".btn-auto")
             print("已开启 AUTO")
         except:
-            print("没找到 AUTO")
-    
-
-        # ===== ⭐ 防卡死：5秒检测是否进入战斗 =====
-        print("检测是否进入战斗...")
-
-        entered = False
-        for _ in range(5):
-            try:
-                page.wait_for_selector(".btn-auto", timeout=1000)
-                entered = True
-                break
-            except:
-                pass
-
-        if not entered:
-            print("5秒无反应 → 强制回 assist")
             page.goto("https://game.granbluefantasy.jp/#quest/assist")
-            page.wait_for_timeout(2000)
+            page.reload()
+            print("没找到 AUTO")
             continue
+    
 
         # ===== 战斗中 =====
         print("战斗中...")
         page.wait_for_timeout(1000)
-
-        # ===== 回 assist =====
-        page.reload()
-        page.wait_for_timeout(1000)
-        page.goto("https://game.granbluefantasy.jp/#quest/assist")
-        page.wait_for_timeout(2000)
