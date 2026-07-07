@@ -12,18 +12,48 @@ with sync_playwright() as p:
     # ===== 初始进入 =====
     page.goto("https://game.granbluefantasy.jp/#mypage/")
     page.goto("https://game.granbluefantasy.jp/#quest/assist")
-    page.wait_for_timeout(2000)
+    page.wait_for_timeout(1000)
 
     print("开始自动流程...")
 
     while True:
-        page.reload()
+        page.evaluate("""
+        () => {
+            const btn = document.querySelector('.btn-treasure-footer-reload');
+
+            if (btn) {
+                const rect = btn.getBoundingClientRect();
+                const x = rect.left + rect.width / 2;
+                const y = rect.top + rect.height / 2;
+
+                btn.dispatchEvent(new MouseEvent('mousedown', {
+                    bubbles: true,
+                    clientX: x,
+                    clientY: y
+                }));
+
+                btn.dispatchEvent(new MouseEvent('mouseup', {
+                    bubbles: true,
+                    clientX: x,
+                    clientY: y
+                }));
+
+                btn.dispatchEvent(new MouseEvent('click', {
+                    bubbles: true,
+                    clientX: x,
+                    clientY: y
+                }));
+            }
+        }
+        """)
+        page.wait_for_timeout(2000)
+
         page.goto("https://game.granbluefantasy.jp/#quest/assist")
         page.wait_for_timeout(2000)
         # ===== 找副本并点击 =====
         found = page.evaluate("""
         () => {
-            const min = 20;
+            const min = 30;
             const max = 100;
 
             let best = null;
@@ -65,7 +95,7 @@ with sync_playwright() as p:
 
         if not found:
             print("没找到副本 → 刷新")
-            page.wait_for_timeout(2000)
+            page.wait_for_timeout(1000)
             continue
 
         print("找到副本，已点击")
@@ -77,7 +107,6 @@ with sync_playwright() as p:
             const btn = document.querySelector('.btn-usual-ok.se-quest-start, .btn-usual-ok');
             if (btn) {
                 btn.scrollIntoView({block: "center", inline: "center"});
-
                 const rect = btn.getBoundingClientRect();
                 const x = rect.left + rect.width / 2;
                 const y = rect.top + rect.height / 2;
@@ -95,7 +124,6 @@ with sync_playwright() as p:
 
         print("尝试点击 OK")
 
-        print("尝试点击 OK")
         page.wait_for_timeout(3000)
 
         # ===== 点 AUTO =====
@@ -106,8 +134,9 @@ with sync_playwright() as p:
             page.wait_for_selector(".btn-attack-start", timeout=10000)
             print("找到攻击按钮，开始监控状态...")
             start_time = time.time()
+            
             while True:
-                if time.time() - start_time > 50:
+                if time.time() - start_time > 45:
                     print("30秒未检测到 display-off → 跳出")
                     break
 
@@ -121,7 +150,6 @@ with sync_playwright() as p:
 
                 if status and "display-off" in status:
                     print("攻击按钮已变为 display-off → 执行下一步")
-                    page.reload()
                     break
                 page.wait_for_timeout(500)  # 每0.5秒检查一次
         except:

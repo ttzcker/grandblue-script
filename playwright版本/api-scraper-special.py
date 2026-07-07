@@ -15,14 +15,52 @@ with sync_playwright() as p:
 
     print("开始自动流程...")
 
+
+
+
+
     while True:
-        page.reload()
+        page.evaluate("""
+        () => {
+            const btn = document.querySelector('.btn-treasure-footer-reload');
+
+            if (btn) {
+                const rect = btn.getBoundingClientRect();
+                const x = rect.left + rect.width / 2;
+                const y = rect.top + rect.height / 2;
+
+                btn.dispatchEvent(new MouseEvent('mousedown', {
+                    bubbles: true,
+                    clientX: x,
+                    clientY: y
+                }));
+
+                btn.dispatchEvent(new MouseEvent('mouseup', {
+                    bubbles: true,
+                    clientX: x,
+                    clientY: y
+                }));
+
+                btn.dispatchEvent(new MouseEvent('click', {
+                    bubbles: true,
+                    clientX: x,
+                    clientY: y
+                }));
+            }
+        }
+        """)
+        page.wait_for_timeout(1000)
+
         page.goto("https://game.granbluefantasy.jp/#quest/assist")
-        page.wait_for_timeout(2000)
+        page.wait_for_timeout(1000)
+
+
+
+
         # ===== 找副本并点击 =====
         found = page.evaluate("""
         () => {
-            const min = 10;
+            const min = 1;
             const max = 30;
 
             let best = null;
@@ -63,12 +101,15 @@ with sync_playwright() as p:
         """)
 
         if not found:
+            page.wait_for_timeout(1000)
             print("没找到副本 → 刷新")
-            page.wait_for_timeout(2000)
             continue
 
         print("找到副本，已点击")
         page.wait_for_timeout(3000)
+
+
+
 
         # ===== 点击 OK =====
         page.evaluate("""
@@ -92,23 +133,5 @@ with sync_playwright() as p:
         }
         """)
 
-        print("尝试点击 OK")
-
-        print("尝试点击 OK")
-        page.wait_for_timeout(3000)
-
-        # ===== 点 AUTO =====
-        try:
-            page.wait_for_selector(".btn-auto", timeout=5000)
-            page.click(".btn-auto")
-            print("已开启 AUTO")
-        except:
-            page.goto("https://game.granbluefantasy.jp/#quest/assist")
-            page.reload()
-            print("没找到 AUTO")
-            continue
-    
-
-        # ===== 战斗中 =====
-        print("战斗中...")
-        page.wait_for_timeout(1000)
+        print("尝试点击 OK") 
+        page.wait_for_timeout(2000)  
